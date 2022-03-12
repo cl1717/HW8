@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Jade Delight</title>
+</head>
+
+<body>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+<script>
+
+function MenuItem(name, cost)
+{
+	this.name = name;
+	this.cost=cost;
+}
+
+menuItems = new Array(
+	new MenuItem("Chicken Chop Suey", 4.5),
+	new MenuItem("Sweet and Sour Pork", 6.25),
+	new MenuItem("Shrimp Lo Mein", 6.25),
+	new MenuItem("Moo Shi Chicken", 7.5),
+	new MenuItem("Fried Rice", 2.85)
+);
+
+function makeSelect(name, minRange, maxRange)
+{
+	var t= "";
+	t = "<select name='" + name + "' size='1'>";
+	for (j=minRange; j<=maxRange; j++)
+	   t += "<option>" + j + "</option>";
+	t+= "</select>"; 
+	return t;
+}
+
+function td(content, className="")
+{
+	return "<td class = '" + className + "'>" + content + "</td>";
+}
+	
+</script>
+
+<script>
+pickupOrDeliv = "pickup";
+$(document).ready (function()
+  {  
+	$(".address").hide();
+
+	$("input[name='p_or_d']").change(function() {
+        $(".address").toggle();
+		//update
+		if (pickupOrDeliv == "pickup") pickupOrDeliv = "delivery";
+		else pickupOrDeliv = "pickup";
+  	});
+
+	$('select').change(function () {
+		ItemIndex = this.name;
+		index = parseInt(ItemIndex.substr(4));
+		price = menuItems[index].cost;
+		quantity = this.value;
+		totalPrice = (price * quantity).toFixed(2);
+		document.getElementsByName("cost")[index].value = totalPrice;
+
+		Subtotal = 0;
+		for (i = 0; i < 5; i++) {
+			Subtotal += Number(document.getElementsByName("cost")[i].value);
+		}
+		document.getElementById("subtotal").value = Subtotal.toFixed(2);
+		Tax = 0.0625 * Subtotal;
+		document.getElementById("tax").value = Tax.toFixed(2);
+		Total = Subtotal + Tax;
+		document.getElementById("total").value = Total.toFixed(2);
+	});
+
+	$("input[type=button]").click(function () {
+		document.getElementById("lastname").innerHTML = "";
+		document.getElementById("phone").innerHTML = "";
+		document.getElementById("validPhone").innerHTML = "";
+		document.getElementById("order").innerHTML = "";
+		document.getElementById("address").innerHTML = "";
+
+		const d = new Date();
+		time = d.getTime();
+		const minute = 1000 * 60;
+		if (pickupOrDeliv == "pickup") d.setTime(time + minute * 15);
+		else d.setTime(time + minute * 30);
+		
+		if (validate()) {
+			alert("Thanks for your order!");
+			text = "Order Details: <br /><br />"
+			item0 = "Chicken Chop Suey: " + Number($("select[name='quan0']").val()) + " <br />Total cost: $"
+			        + (Number($("select[name='quan0']").val()) * 4.50).toFixed(2) + "<br />";
+			item1 = "Sweet and Sour Pork: " + Number($("select[name='quan1']").val()) + " <br />Total cost: $"
+			        + (Number($("select[name='quan1']").val()) * 6.25).toFixed(2) + "<br />";
+			item2 = "Shrimp Lo Mein: " + Number($("select[name='quan2']").val()) + " <br />Total cost: $"
+					+ (Number($("select[name='quan2']").val()) * 6.25).toFixed(2) + "<br />";
+			item3 = "Moo Shi Chicken: " + Number($("select[name='quan3']").val()) + " <br />Total cost: $"
+			        + (Number($("select[name='quan3']").val()) * 7.50).toFixed(2) + "<br />";
+			item4 = "Fried Rice: " + Number($("select[name='quan4']").val()) + " <br />Total cost: $"
+			        + (Number($("select[name='quan4']").val()) * 2.85).toFixed(2) + "<br />";
+			items = item0 + item1 + item2 + item3 + item4;
+			detail_subtotal = "<br /> Subtotal: $" + document.getElementById("subtotal").value;
+			detail_tax = "<br /> Tax: $" + document.getElementById("tax").value;
+			detail_total = "<br /> Total: $" + document.getElementById("total").value;
+			detail_time = "<br /><br /> Meal will be ready at: " + d;
+			output = text + items + detail_subtotal + detail_tax + detail_total + detail_time;
+			const newWindow = window.open("", "", "width=300,height=300");
+			newWindow.document.write(output);
+		}	
+	});
+});
+
+function validate() {
+	if ($("input[name='lname']").val() == "") { //check last name not empty
+		document.getElementById("lastname").innerHTML = "Please enter your last name <br />";
+		return false;
+	} 
+	if ($("input[name='phone']").val() == "") { //check phone number not empty
+		document.getElementById("phone").innerHTML = "Please enter your phone number <br />";
+		return false;
+	}
+	if (!validPhone()) { //check phone number is valid
+		document.getElementById("validPhone").innerHTML = "Please enter a valid phone number <br />";
+		return false;
+	}
+	if (pickupOrDeliv == "delivery") { //if delivery - check address not empty
+		if ($("input[name='street']").val() == "" || $("input[name='city']").val() == "") {
+			document.getElementById("address").innerHTML = "Please enter your address <br />";
+			return false;
+		}
+	}
+	numItems = Number($("select[name='quan0']").val()) + Number($("select[name='quan1']").val()) + 
+			Number($("select[name='quan2']").val()) + Number($("select[name='quan3']").val()) + 
+			Number($("select[name='quan4']").val());
+	if (numItems == 0) { //check >0 items ordered
+		document.getElementById("order").innerHTML = "At least one item needs to be ordered <br />";
+		return false;
+	} 
+	return true;
+}
+
+function validPhone() {
+	var phoneno10 = /^\(?[0-9]{3}\)?[\s.-]?([0-9]{3})?[\s.-]?([0-9]{4})$/;
+	var phoneno7 = /^\(?[0-9]{3}\)?[\s.-]?([0-9]{4})$/;
+
+    if($("input[name='phone']").val().match(phoneno10) || $("input[name='phone']").val().match(phoneno7)){
+		return true;
+	} else {
+        return false;
+    }
+}
+
+</script>
+
+<style>
+	input[name=fname], input[name=lname], input[name=street], input[name=city], input[name=phone] {
+		position: absolute;
+		left: 100px;
+	}
+	input[name=subtotal], input[name=tax], input[name=total] {
+		position: absolute;
+		left: 150px;
+	}
+
+</style>
+
+<h1>Jade Delight</h1>
+<form>
+
+<p class="userInfo"><label>First Name:</label> <input type="text"  name='fname' /></p>
+<p class="userInfo"><label>Last Name*</label>:  <input type="text"  name='lname' /></p>
+<p class="userInfo address"><label>Street*</label>: <input type="text" name='street' /></p>
+<p class="userInfo address"><label>City*</label>: <input type="text" name='city' /></p>
+<p class="userInfo"><label>Phone*</label>: <input type="text"  name='phone' /></p>
+<p> 
+	<input type="radio"  name="p_or_d" value = "pickup" checked="checked"/>Pickup  
+	<input type="radio"  name='p_or_d' value = 'delivery'/>
+	Delivery
+</p>
+<table border="0" cellpadding="3">
+  <tr>
+    <th>Select Item</th>
+    <th>Item Name</th>
+    <th>Cost Each</th>
+    <th>Total Cost</th>
+  </tr>
+<script>
+
+  var s = "";
+  for (i=0; i< menuItems.length; i++)
+  {
+	  s += "<tr>";
+	  s += td(makeSelect("quan" + i, 0, 10),"selectQuantity");
+	  s += td(menuItems[i].name, "itemName");
+	  s += td("$" +menuItems[i].cost.toFixed(2), "cost");
+	  s += td("$<input type='text' name='cost'/>", "totalCost");
+	  s+= "</tr>";
+  }
+  document.writeln(s);
+</script>
+</table>
+<p class="subtotal totalSection"><label>Subtotal</label>: 
+   $ <input type="text"  name='subtotal' id="subtotal" />
+</p>
+<p class="tax totalSection"><label>Mass tax 6.25%:</label>
+  $ <input type="text"  name='tax' id="tax" />
+</p>
+<p class="total totalSection"><label>Total:</label> $ <input type="text"  name='total' id="total" />
+</p>
+
+<input type = "button" value = "Submit Order" />
+
+<!-- new code -->
+<br>
+<br>
+<div id="lastname">&nbsp</div>
+<div id="phone">&nbsp</div>
+<div id="validPhone">&nbsp</div>
+<div id="order">&nbsp</div>
+<div id="address">&nbsp</div>
+
+</form>
+</body>
+</html>
