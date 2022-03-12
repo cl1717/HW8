@@ -88,17 +88,11 @@ $(document).ready (function()
 		if (validate()) {
 			alert("Thanks for your order!");
 			text = "Order Details: <br /><br />"
-			item0 = "Chicken Chop Suey: " + Number($("select[name='quan0']").val()) + " <br />Total cost: $"
-			        + (Number($("select[name='quan0']").val()) * 4.50).toFixed(2) + "<br />";
-			item1 = "Sweet and Sour Pork: " + Number($("select[name='quan1']").val()) + " <br />Total cost: $"
-			        + (Number($("select[name='quan1']").val()) * 6.25).toFixed(2) + "<br />";
-			item2 = "Shrimp Lo Mein: " + Number($("select[name='quan2']").val()) + " <br />Total cost: $"
-					+ (Number($("select[name='quan2']").val()) * 6.25).toFixed(2) + "<br />";
-			item3 = "Moo Shi Chicken: " + Number($("select[name='quan3']").val()) + " <br />Total cost: $"
-			        + (Number($("select[name='quan3']").val()) * 7.50).toFixed(2) + "<br />";
-			item4 = "Fried Rice: " + Number($("select[name='quan4']").val()) + " <br />Total cost: $"
-			        + (Number($("select[name='quan4']").val()) * 2.85).toFixed(2) + "<br />";
-			items = item0 + item1 + item2 + item3 + item4;
+			items = "";
+			for (i = 0; i < menuItems.length; i++) {
+				items += menuItems[i].name + ": " + Number($("select[name='quan"+ i + "']").val()) + " <br />Total cost: $"
+				      + (Number($("select[name='quan"+ i + "']").val()) * menuItems[i].cost).toFixed(2) + "<br />";
+			}
 			detail_subtotal = "<br /> Subtotal: $" + document.getElementById("subtotal").value;
 			detail_tax = "<br /> Tax: $" + document.getElementById("tax").value;
 			detail_total = "<br /> Total: $" + document.getElementById("total").value;
@@ -161,7 +155,6 @@ function validPhone() {
 		position: absolute;
 		left: 150px;
 	}
-
 </style>
 
 <h1>Jade Delight</h1>
